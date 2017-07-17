@@ -28,6 +28,7 @@ type Startup private () =
     // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services: IServiceCollection) =
         // Add framework services.
+        services.AddSingleton(this.Configuration) |> ignore
         services.Configure<OtrOptions>(this.Configuration.GetSection("Otr")) |> ignore
         services.AddMvc() |> ignore
 
