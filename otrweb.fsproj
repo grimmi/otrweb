@@ -6,6 +6,8 @@
   <ItemGroup>
     <Compile Include="Options/*.fs" />
     <Compile Include="TvDbApi.fs" />
+    <Compile Include="MovieDbApi.fs" />
+    <Compile Include="InfoCollector.fs" />
     <Compile Include="Controllers/*.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />

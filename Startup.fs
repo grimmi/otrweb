@@ -35,6 +35,8 @@ type Startup private () =
         services.Configure<TvDbOptions>(this.Configuration.GetSection("TvDb")) |> ignore 
         services.Configure<MovieDbOptions>(this.Configuration.GetSection("MovieDb")) |> ignore
         services.AddSingleton<TvDbApi>() |> ignore
+        services.AddSingleton<MovieDbApi>() |> ignore
+        services.AddSingleton<InfoCollector>() |> ignore
         services.AddMvc() |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

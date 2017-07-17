@@ -5,16 +5,19 @@ open OtrWeb.Options
 open Newtonsoft.Json.Linq
 open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.Options
+open System.IO
 
 [<Route("api/keyfiles")>]
-type KeyFilesController(otrConfig : IOptions<OtrOptions>, tvApi : TvDbApi) =
+type KeyFilesController(otrConfig : IOptions<OtrOptions>, collector : InfoCollector) =
     inherit Controller()
 
     let options = otrConfig.Value
 
     [<HttpGet>]
     member this.Get() =
-        let response = JObject()
-        response.Add("tvdburl", JToken.FromObject(tvApi.Options.ApiUrl))
+        let infos = Directory.GetFiles(options.KeyFilePath, "*.otrkey")
+                    |> Seq.map collector.GetInfo
 
-        response
+        let response = JObject()
+        response.Add("files", JToken.FromObject(infos))      
+        response  
