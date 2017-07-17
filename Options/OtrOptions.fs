@@ -1,4 +1,4 @@
-namespace OtrWeb
+namespace OtrWeb.Options
 
 type OtrOptions() =
     member val Email = "" with get, set

@@ -1,5 +1,6 @@
 ﻿namespace OtrWeb
 
+open OtrWeb.Options
 open System
 open System.Collections.Generic
 open System.Linq
@@ -30,6 +31,7 @@ type Startup private () =
         // Add framework services.
         services.AddSingleton(this.Configuration) |> ignore
         services.Configure<OtrOptions>(this.Configuration.GetSection("Otr")) |> ignore
+        services.Configure<KodiOptions>(this.Configuration.GetSection("Kodi")) |> ignore
         services.AddMvc() |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
