@@ -1,4 +1,4 @@
-﻿namespace otrweb
+﻿namespace OtrWeb
 
 open System
 open System.Collections.Generic
@@ -43,6 +43,10 @@ type Startup private () =
 
         app.UseStaticFiles() |> ignore
 
-        app.UseMvc() |> ignore
+        app.UseMvc(fun routes ->
+            routes.MapRoute(
+                name = "default",
+                template = "{controller=Home}/{action=Index}/{id?}") |> ignore
+            ) |> ignore
 
     member val Configuration : IConfigurationRoot = null with get, set

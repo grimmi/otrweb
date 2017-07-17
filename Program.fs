@@ -1,4 +1,4 @@
-﻿namespace otrweb
+﻿namespace OtrWeb
 
 open System
 open System.Collections.Generic
