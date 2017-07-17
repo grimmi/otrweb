@@ -32,6 +32,9 @@ type Startup private () =
         services.AddSingleton(this.Configuration) |> ignore
         services.Configure<OtrOptions>(this.Configuration.GetSection("Otr")) |> ignore
         services.Configure<KodiOptions>(this.Configuration.GetSection("Kodi")) |> ignore
+        services.Configure<TvDbOptions>(this.Configuration.GetSection("TvDb")) |> ignore 
+        services.Configure<MovieDbOptions>(this.Configuration.GetSection("MovieDb")) |> ignore
+        services.AddSingleton<TvDbApi>() |> ignore
         services.AddMvc() |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
