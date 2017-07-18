@@ -1,5 +1,6 @@
 namespace OtrWeb.Controllers
 
+open JsonHandling
 open OtrWeb
 open OtrWeb.Options
 open Newtonsoft.Json.Linq
@@ -16,7 +17,7 @@ type KeyFilesController(otrConfig : IOptions<OtrOptions>, collector : InfoCollec
     [<HttpGet>]
     member this.Get() =
         let infos = Directory.GetFiles(options.KeyFilePath, "*.otrkey")
-                    |> Seq.map collector.GetInfo
+                    |> Seq.map (collector.GetInfo >> makeJson)
 
         let response = JObject()
         response.Add("files", JToken.FromObject(infos))      
