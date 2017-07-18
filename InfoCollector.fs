@@ -1,5 +1,7 @@
 namespace OtrWeb
 
+open FileNameParser
+open System.IO
 open System.Text.RegularExpressions
 
 type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
@@ -16,14 +18,18 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         |_ -> false
 
     let findMovie file =
-        Movie(file, "some movie", "somewhen")
+        let parsedName = parseMovieName file
+        Movie(file, parsedName, "somewhen")
 
     let findEpisode file = 
-        Episode(file, "some episode", 3, "some show", 1, "somewhen")
+        let parsedShow = parseShowName file
+        let parsedEpisode = parseEpisodeName file
+        Episode(file, parsedEpisode, -1, parsedShow, -1, "somewhen")
 
     member this.GetInfo file = 
-        let info = if isMovie file then
-                        findMovie file
+        let fileName = Path.GetFileName file
+        let info = if isMovie fileName then
+                        findMovie fileName
                     else
-                        findEpisode file
+                        findEpisode fileName
         info

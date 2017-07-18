@@ -4,6 +4,7 @@
     <MvcRazorCompileOnPublish>true</MvcRazorCompileOnPublish>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FileNameParser.fs" />
     <Compile Include="Options/*.fs" />
     <Compile Include="FileType.fs" />
     <Compile Include="JsonHandling.fs" />
