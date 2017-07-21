@@ -7,6 +7,7 @@
     <Compile Include="FileNameParser.fs" />
     <Compile Include="Options/*.fs" />
     <Compile Include="FileType.fs" />
+    <Compile Include="EpisodeCache.fs" />
     <Compile Include="JsonHandling.fs" />
     <Compile Include="TvDbApi.fs" />
     <Compile Include="MovieDbApi.fs" />

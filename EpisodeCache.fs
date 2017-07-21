@@ -2,10 +2,12 @@ namespace OtrWeb
 
 open System
 open System.IO
+open OtrWeb
 
 type ShowCache() =
 
-    let mapFile = "shows.map"
+    let showMapFile = "shows.map"
+    let episodeCacheFolder = "./episodes/"
 
     let serializeMapping parsed name id =
         sprintf "%s***%s***%d" parsed name id
@@ -16,13 +18,26 @@ type ShowCache() =
         |_ -> None
 
     let loadMappings =
-        File.ReadAllLines mapFile
+        File.ReadAllLines showMapFile
         |> Seq.choose deserializeMapping
 
     let saveMapping parsed name id = 
         let serialized = serializeMapping parsed name id
-        if not (File.ReadAllLines(mapFile) |> Seq.exists(fun line -> line = serialized)) then
-            File.AppendAllText(mapFile, (sprintf "%s%s" Environment.NewLine serialized))
+        if not (File.ReadAllLines(showMapFile) |> Seq.exists(fun line -> line = serialized)) then
+            File.AppendAllText(showMapFile, (sprintf "%s%s" Environment.NewLine serialized))
+
+    let serializeEpisode (showid : int) (episode : FileType) =
+        match episode with        
+        |Episode(_, name, number, show, season, aired) -> 
+            let serialized = sprintf "%s***%d***%d***%s***%s" show season number name aired
+            let cachePath = Path.Combine(episodeCacheFolder, (showid |> string) + ".cache")
+            File.AppendAllText(cachePath, serialized)
+        |_ -> ()
+
+    let deserializeEpisode (cachedLine:string) =
+        match cachedLine.Split([|"***"|], StringSplitOptions.RemoveEmptyEntries) with
+        |[|show;seasonString;numberString;name;aired|] -> Some(Episode("", name, numberString |> int, show, seasonString |> int, aired))
+        |_ -> None
 
     member this.Mappings = loadMappings
 
@@ -33,3 +48,7 @@ type ShowCache() =
     member this.SaveMapping parsed mapped =
         let name, id = mapped
         saveMapping parsed name id
+
+    member this.SaveEpisodes (show : string * int) (episodes : FileType seq) =
+        let showname, showid = show
+        Seq.iter(fun e -> serializeEpisode showid e) episodes
