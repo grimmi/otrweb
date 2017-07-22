@@ -1,6 +1,7 @@
 namespace OtrWeb
 
 open OtrWeb.Options
+open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open Microsoft.Extensions.Options
 open System
@@ -63,3 +64,48 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
         let response = (this.Get query) |> Async.RunSynchronously
         response.["data"]
         |> Seq.map(fun d -> (d.Value<string>("seriesName"), d.Value<int>("id")))
+
+
+    member private this.LoadEpisodesFromApi(showId, showName) = async {
+
+        let getEpisodePage showId page : Async<JObject>= async{
+            let! response = this.Get(sprintf "/series/%d/episodes?page=%d" showId page)
+            return response
+        }
+
+        let! firstPage = getEpisodePage showId 1
+        let lastPageNo = firstPage.["links"].Value<int>("last")
+
+        let pages = if lastPageNo > 1 then
+                        [ 2 .. lastPageNo ]
+                        |> Seq.map(fun p -> async { let! pageResult = getEpisodePage showId p
+                                                    return pageResult } |> Async.RunSynchronously)
+                        |> List.ofSeq
+                        |> List.append [firstPage]  
+                    else
+                        [firstPage]
+
+        return pages
+        |> Seq.collect(fun p -> p.["data"] 
+                                |> Seq.choose(fun e -> 
+                                    try
+                                        let name = e.Value<string>("episodeName")
+                                        let number = e.Value<int>("airedEpisodeNumber")
+                                        let season = e.Value<int>("airedSeason")
+                                        let aired = e.Value<string>("firstAired")
+                                        Some(Episode("", name, number, showName, season, aired))
+                                    with
+                                        | :? Exception as ex -> None))
+                                                            
+        |> Seq.sortBy(fun ep -> match ep with
+                                |Episode(_,_,num,_,season,_) -> (num, season)
+                                |_ -> (0,0))
+    }
+
+    member this.GetEpisodes (showId, showName) = 
+        let episodes = async {
+            let! apiEpisodes = this.LoadEpisodesFromApi(showId)            
+            return apiEpisodes
+        }
+
+        (episodes |> Async.RunSynchronously)
