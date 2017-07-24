@@ -19,7 +19,15 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
 
     let findMovie file =
         let parsedName = parseMovieName file
-        Movie(parsedName, "somewhen")
+        let movies = (movieApi.SearchMovie parsedName) |> Async.RunSynchronously
+
+        let found = movies |> Seq.tryFind(fun m -> match m with
+                                                   |Movie(name, released) -> (name |> canonizeFileName) = (parsedName |> canonizeFileName)
+                                                   |_ -> false)
+
+        match found with
+        |Some(movie) -> movie
+        |_ -> Unknown
 
     let findEpisode file = 
         let parsedShow = parseShowName file
