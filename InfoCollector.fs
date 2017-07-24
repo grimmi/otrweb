@@ -19,17 +19,26 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
 
     let findMovie file =
         let parsedName = parseMovieName file
-        Movie(file, parsedName, "somewhen")
+        Movie(parsedName, "somewhen")
 
     let findEpisode file = 
         let parsedShow = parseShowName file
         let apiShows = (tvApi.FindShow parsedShow) |> List.ofSeq
         let apiShow = match apiShows |> List.tryFind(fun (name, id) -> 
                             (name |> canonizeFileName) = (parsedShow |> canonizeFileName)) with
-                      |Some(name, id) -> name
-                      |_ -> ""
+                      |Some(name, id) -> (name, id)
+                      |_ -> ("", -1)
         let parsedEpisode = parseEpisodeName file
-        Episode(file, parsedEpisode, -1, parsedShow, -1, "somewhen")
+
+        let showEpisodes = tvApi.GetEpisodes(snd apiShow, fst apiShow) |> List.ofSeq
+        let apiEpisode = showEpisodes |> Seq.tryFind(fun ep ->
+            match ep with
+            |Episode(epName, epNumber, epShow, epSeason, epAired) -> (epName |> canonizeFileName) = (parsedEpisode |> canonizeFileName)
+            |_ -> false)
+
+        match apiEpisode with
+        |None -> Unknown
+        |_ -> apiEpisode.Value
 
     member this.GetInfo file = 
         let fileName = Path.GetFileName file
@@ -37,4 +46,4 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
                         findMovie fileName
                     else
                         findEpisode fileName
-        info
+        { file = file; info = info }

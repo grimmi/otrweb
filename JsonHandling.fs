@@ -3,9 +3,10 @@ module JsonHandling
 open OtrWeb
 open Newtonsoft.Json.Linq
 
-let makeJson info = 
+let makeJson (fileinfo : FileInfo) = 
+    let file, info = (fileinfo.file, fileinfo.info)
     let response = match info with
-                   |Episode(file, name, number, show, season, aired) ->
+                   |Episode(name, number, show, season, aired) ->
                         let episode = JObject()
                         episode.Add("type", JToken.FromObject("episode"))
                         episode.Add("file", JToken.FromObject(file))
@@ -15,14 +16,14 @@ let makeJson info =
                         episode.Add("season", JToken.FromObject(season))
                         episode.Add("aired", JToken.FromObject(aired))
                         episode
-                   |Movie(file, name, released) ->
+                   |Movie(name, released) ->
                         let movie = JObject()
                         movie.Add("type", JToken.FromObject("movie"))
                         movie.Add("file", JToken.FromObject(file))
                         movie.Add("name", JToken.FromObject(name))
                         movie.Add("released", JToken.FromObject(released))
                         movie
-                   |Unknown(file) ->
+                   |Unknown ->
                         let unknown = JObject()
                         unknown.Add("type", JToken.FromObject("unknown"))
                         unknown.Add("file", JToken.FromObject(file))

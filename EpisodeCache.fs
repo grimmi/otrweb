@@ -28,7 +28,7 @@ type ShowCache() =
 
     let serializeEpisode (showid : int) (episode : FileType) =
         match episode with        
-        |Episode(_, name, number, show, season, aired) -> 
+        |Episode(name, number, show, season, aired) -> 
             let serialized = sprintf "%s***%d***%d***%s***%s" show season number name aired
             let cachePath = Path.Combine(episodeCacheFolder, (showid |> string) + ".cache")
             File.AppendAllText(cachePath, serialized)
@@ -36,7 +36,7 @@ type ShowCache() =
 
     let deserializeEpisode (cachedLine:string) =
         match cachedLine.Split([|"***"|], StringSplitOptions.RemoveEmptyEntries) with
-        |[|show;seasonString;numberString;name;aired|] -> Some(Episode("", name, numberString |> int, show, seasonString |> int, aired))
+        |[|show;seasonString;numberString;name;aired|] -> Some(Episode(name, numberString |> int, show, seasonString |> int, aired))
         |_ -> None
 
     member this.Mappings = loadMappings
@@ -52,3 +52,10 @@ type ShowCache() =
     member this.SaveEpisodes (show : string * int) (episodes : FileType seq) =
         let showname, showid = show
         Seq.iter(fun e -> serializeEpisode showid e) episodes
+
+    member this.GetEpisodes showId =
+        let showFile = Path.Combine(episodeCacheFolder, (showId |> string) + ".cache")
+        let episodes = match File.Exists showFile with
+                       |true -> showFile |> File.ReadAllLines |> List.ofArray |> List.choose deserializeEpisode
+                       |_ -> List.empty<FileType>
+        episodes

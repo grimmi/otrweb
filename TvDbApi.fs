@@ -14,6 +14,7 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
 
     let mutable apiClient : HttpClient = null
     let mutable loggedIn : bool = false
+    let cache = ShowCache()
 
     member this.Options = options.Value
 
@@ -103,9 +104,14 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
     }
 
     member this.GetEpisodes (showId, showName) = 
-        let episodes = async {
-            let! apiEpisodes = this.LoadEpisodesFromApi(showId)            
-            return apiEpisodes
-        }
+        let cachedEpisodes = cache.GetEpisodes showId
+        let episodes = match cachedEpisodes with
+                       |[] -> let apiEpisodes = (async {
+                                        let! apiEpisodes = this.LoadEpisodesFromApi(showId, showName)            
+                                        return apiEpisodes
+                                    } |> Async.RunSynchronously)
+                              cache.SaveEpisodes (showName, showId) apiEpisodes
+                              apiEpisodes
+                       |_ -> cachedEpisodes |> Seq.ofList
 
-        (episodes |> Async.RunSynchronously)
+        episodes
