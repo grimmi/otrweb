@@ -308,3 +308,5 @@ obj/otrweb.fsproj.nuget.g.props
 obj/otrweb.fsproj.nuget.g.targets
 obj/otrweb.fsproj.proj-info.targets
 obj/
+shows.map
+episodes/**
