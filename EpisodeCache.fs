@@ -9,6 +9,21 @@ type ShowCache() =
     let showMapFile = "shows.map"
     let episodeCacheFolder = "./episodes/"
 
+    let getShowCacheFile showId =
+        let cachePath = Path.Combine(episodeCacheFolder, (showId |> string) + ".cache")
+        if not (Directory.Exists episodeCacheFolder) then
+            Directory.CreateDirectory episodeCacheFolder |> ignore
+        if not (File.Exists cachePath) then
+            let newFile = File.Create cachePath
+            newFile.Close()
+        cachePath
+
+    let getShowMapFile =
+        if not (File.Exists showMapFile) then
+            let newFile = File.Create showMapFile
+            newFile.Close()
+        showMapFile
+
     let serializeMapping parsed name id =
         sprintf "%s***%s***%d" parsed name id
     
@@ -18,19 +33,19 @@ type ShowCache() =
         |_ -> None
 
     let loadMappings =
-        File.ReadAllLines showMapFile
+        File.ReadAllLines getShowMapFile
         |> Seq.choose deserializeMapping
 
     let saveMapping parsed name id = 
         let serialized = serializeMapping parsed name id
-        if not (File.ReadAllLines(showMapFile) |> Seq.exists(fun line -> line = serialized)) then
-            File.AppendAllText(showMapFile, (sprintf "%s%s" Environment.NewLine serialized))
+        if not (File.ReadAllLines(getShowMapFile) |> Seq.exists(fun line -> line = serialized)) then
+            File.AppendAllText(getShowMapFile, (sprintf "%s%s" Environment.NewLine serialized))
 
     let serializeEpisode (showid : int) (episode : FileType) =
         match episode with        
         |Episode(name, number, show, season, aired) -> 
-            let serialized = sprintf "%s***%d***%d***%s***%s" show season number name aired
-            let cachePath = Path.Combine(episodeCacheFolder, (showid |> string) + ".cache")
+            let serialized = sprintf "%s***%d***%d***%s***%s%s" show season number name aired Environment.NewLine
+            let cachePath = getShowCacheFile showid
             File.AppendAllText(cachePath, serialized)
         |_ -> ()
 
@@ -54,8 +69,5 @@ type ShowCache() =
         Seq.iter(fun e -> serializeEpisode showid e) episodes
 
     member this.GetEpisodes showId =
-        let showFile = Path.Combine(episodeCacheFolder, (showId |> string) + ".cache")
-        let episodes = match File.Exists showFile with
-                       |true -> showFile |> File.ReadAllLines |> List.ofArray |> List.choose deserializeEpisode
-                       |_ -> List.empty<FileType>
-        episodes
+        let showFile = getShowCacheFile showId
+        showFile |> File.ReadAllLines |> List.ofArray |> List.choose deserializeEpisode
