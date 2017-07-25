@@ -60,6 +60,9 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
 
         get true
 
+    member this.CacheShow parsed real =
+        cache.SaveMapping parsed real
+
     member this.FindShow showName =
         let query = sprintf "/search/series?name=%s" (Uri.EscapeDataString(showName))
         let response = (this.Get query) |> Async.RunSynchronously

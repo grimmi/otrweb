@@ -34,7 +34,9 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         let apiShows = (tvApi.FindShow parsedShow) |> List.ofSeq
         let apiShow = match apiShows |> List.tryFind(fun (name, id) -> 
                             (name |> canonizeFileName) = (parsedShow |> canonizeFileName)) with
-                      |Some(name, id) -> (name, id)
+                      |Some(name, id) -> 
+                        tvApi.CacheShow parsedShow (name, id)
+                        (name, id)
                       |_ -> ("", -1)
         let parsedEpisode = parseEpisodeName file
 
