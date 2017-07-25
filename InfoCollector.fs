@@ -32,23 +32,41 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
     let findEpisode file = 
         let parsedShow = parseShowName file
         let apiShows = (tvApi.FindShow parsedShow) |> List.ofSeq
-        let apiShow = match apiShows |> List.tryFind(fun (name, id) -> 
-                            (name |> canonizeFileName) = (parsedShow |> canonizeFileName)) with
-                      |Some(name, id) -> 
-                        tvApi.CacheShow parsedShow (name, id)
-                        (name, id)
-                      |_ -> ("", -1)
-        let parsedEpisode = parseEpisodeName file
+        let (apiShowName, apiShowId) = if (apiShows |> Seq.length = 1) then
+                                            apiShows |> Seq.head
+                                       else
+                                           match apiShows |> List.tryFind(fun (name, id) -> 
+                                                (name |> canonizeFileName) = (parsedShow |> canonizeFileName)) with
+                                           |Some(name, id) -> 
+                                             tvApi.CacheShow parsedShow (name, id)
+                                             (name, id)
+                                           |_ -> (parsedShow, -1)
 
-        let showEpisodes = tvApi.GetEpisodes(snd apiShow, fst apiShow) |> List.ofSeq
-        let apiEpisode = showEpisodes |> Seq.tryFind(fun ep ->
-            match ep with
-            |Episode(epName, epNumber, epShow, epSeason, epAired) -> (epName |> canonizeFileName) = (parsedEpisode |> canonizeFileName)
-            |_ -> false)
+        if apiShowId = -1 then
+            Unknown
+        else
+            let showEpisodes = tvApi.GetEpisodes(apiShowId, apiShowName) |> List.ofSeq
+            let episode = if file.Contains("__") then
+                                let parsedEpisode = parseEpisodeName file
+                                let apiEpisode = showEpisodes |> Seq.tryFind(fun ep ->
+                                    match ep with
+                                    |Episode(epName, epNumber, epShow, epSeason, epAired) -> (epName |> canonizeFileName) = (parsedEpisode |> canonizeFileName)
+                                    |_ -> false)
 
-        match apiEpisode with
-        |None -> Unknown
-        |_ -> apiEpisode.Value
+                                match apiEpisode with
+                                |None -> Episode(parsedEpisode, -1, apiShowName, -1, "unknown")
+                                |_ -> apiEpisode.Value
+                          else
+                                let episodeDate = parseEpisodeDate file
+                                let apiEpisode = showEpisodes |> Seq.tryFind(fun ep ->
+                                    match ep with
+                                    |Episode(epName, epNumber, epShow, epSeason, epAired) -> epAired = episodeDate
+                                    |_ -> false)
+
+                                match apiEpisode with
+                                |None -> Episode("unknown", -1, apiShowName, -1, episodeDate)
+                                |_ -> apiEpisode.Value
+            episode
 
     member this.GetInfo file = 
         let fileName = Path.GetFileName file
