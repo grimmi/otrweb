@@ -47,7 +47,7 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
 
     let episodeFinder compare value =
         Seq.tryFind(fun e -> match e with
-                             |Episode(epName, epNumber, epShow, cand, epSeason, epAired) -> compare epName epAired value
+                             |Episode(epName, epNumber, epShow, cand, epSeason, epAired) -> compare value epName epAired 
                              |_ -> false)
 
     let findEpisodeByName file showName showId episodes =
