@@ -11,13 +11,12 @@ let canonizeFileName (name:string) =
     |> String.filter(fun c -> Char.IsLetter c || Char.IsDigit c)
 
 let parseEpisodeName (file:string) =
-        let lastDoubleUnderscoreIdx = file.LastIndexOf("__")
-        let episodePart = file.Substring(0, lastDoubleUnderscoreIdx)
+        let fileParts = file.Split([|"__"|], StringSplitOptions.RemoveEmptyEntries)
+        let episodePart = String.Concat(fileParts |> Array.skip 1)
         let episodeNameMatch = Regex.Match(episodePart, beforeDatePattern)
         match episodeNameMatch.Value with
         |"" -> episodePart
         |_ -> episodeNameMatch.Value
-
 
 let parseEpisodeDate (file:string) = 
     match Regex.Match(file, datePattern).Value.Split('.') with
