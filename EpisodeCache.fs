@@ -66,7 +66,11 @@ type ShowCache() =
 
     member this.SaveEpisodes (show : string * int) (episodes : FileType seq) =
         let showname, showid = show
-        Seq.iter(fun e -> serializeEpisode showid e) episodes
+        episodes
+        |> Seq.sortBy(fun e -> match e with
+                            |Episode(_,number,_,_,season,_) -> (season, number)
+                            |_ -> (0,0))
+        |> Seq.iter(fun e -> serializeEpisode showid e)
 
     member this.GetEpisodes showId =
         let showFile = getShowCacheFile showId
