@@ -23,13 +23,16 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         |duration when duration > 90 -> true
         |_ -> false
 
+    let matchMovie parsed m =
+        match m with
+        |Movie(name, _, _) -> (name |> canonizeFileName) = (parsed |> canonizeFileName)
+        |_ -> false
+
     let findMovie file =
         let parsedName = parseMovieName file
         let movies = (movieApi.SearchMovie parsedName) |> Async.RunSynchronously
 
-        let found = movies |> Seq.tryFind(fun m -> match m with
-                                                   |Movie(name, released, _) -> (name |> canonizeFileName) = (parsedName |> canonizeFileName)
-                                                   |_ -> false)
+        let found = movies |> Seq.tryFind(fun m -> m |> matchMovie parsedName)
 
         match found with
         |Some(movie) -> movie
@@ -86,8 +89,6 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
 
     member this.GetInfo file = 
         let fileName = Path.GetFileName file
-        let info = if isMovie fileName then
-                        findMovie fileName
-                    else
-                        findEpisode fileName
-        { file = file; info = info }
+        match isMovie fileName with
+        |true -> { file = file; info = findMovie fileName }
+        |false -> { file = file; info = findEpisode fileName }
