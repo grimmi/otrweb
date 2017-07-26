@@ -43,7 +43,7 @@ type ShowCache() =
 
     let serializeEpisode (showid : int) (episode : FileType) =
         match episode with        
-        |Episode(name, number, show, season, aired) -> 
+        |Episode(name, number, show, _, season, aired) -> 
             let serialized = sprintf "%s***%d***%d***%s***%s%s" show season number name aired Environment.NewLine
             let cachePath = getShowCacheFile showid
             File.AppendAllText(cachePath, serialized)
@@ -51,7 +51,7 @@ type ShowCache() =
 
     let deserializeEpisode (cachedLine:string) =
         match cachedLine.Split([|"***"|], StringSplitOptions.RemoveEmptyEntries) with
-        |[|show;seasonString;numberString;name;aired|] -> Some(Episode(name, numberString |> int, show, seasonString |> int, aired))
+        |[|show;seasonString;numberString;name;aired|] -> Some(Episode(name, numberString |> int, show, [||], seasonString |> int, aired))
         |_ -> None
 
     member this.Mappings = loadMappings

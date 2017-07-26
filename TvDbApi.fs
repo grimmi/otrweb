@@ -100,12 +100,12 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
                                         let number = e.Value<int>("airedEpisodeNumber")
                                         let season = e.Value<int>("airedSeason")
                                         let aired = e.Value<string>("firstAired")
-                                        Some(Episode(name, number, showName, season, aired))
+                                        Some(Episode(name, number, showName, [||], season, aired))
                                     with
                                         | :? Exception as ex -> None))
                                                             
         |> Seq.sortBy(fun ep -> match ep with
-                                |Episode(_,num,_,season,_) -> (num, season)
+                                |Episode(_,num,_,_,season,_) -> (num, season)
                                 |_ -> (0,0))
     }
 

@@ -28,7 +28,7 @@ type MovieDbApi(options : IOptions<MovieDbOptions>)=
         let! searchResponse = this.Get ("/search/movie?query=" + movieName)
 
         let results = searchResponse.["results"]
-        let movies = results |> Seq.map(fun r -> Movie(r.Value<string>("original_title"), r.Value<string>("release_date")))
+        let movies = results |> Seq.map(fun r -> Movie(r.Value<string>("original_title"), r.Value<string>("release_date"), [||]))
 
         return movies
     }
