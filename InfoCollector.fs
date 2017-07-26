@@ -53,11 +53,11 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         |Episode(name, _, _, _, _, aired) -> compare value name aired 
         |_ -> false
 
-    let find compare value = Seq.tryFind(fun e -> e |> matchEpisode compare value)
+    let tryFindEpisode compare value = Seq.tryFind(fun e -> e |> matchEpisode compare value)
 
     let find parse compare file episodes =
         let parsedValue = parse file
-        let apiEpisode = episodes |> find compare parsedValue
+        let apiEpisode = episodes |> tryFindEpisode compare parsedValue
         (apiEpisode, parsedValue)
 
     let findByDate = find parseEpisodeDate dateCompare
