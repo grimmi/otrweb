@@ -68,8 +68,8 @@ type ShowCache() =
         let showname, showid = show
         episodes
         |> Seq.sortBy(fun e -> match e with
-                            |Episode(_,number,_,_,season,_) -> (season, number)
-                            |_ -> (0,0))
+                               |Episode(_,number,_,_,season,_) -> (season, number)
+                               |_ -> (0,0))
         |> Seq.iter(fun e -> serializeEpisode showid e)
 
     member this.GetEpisodes showId =

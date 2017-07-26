@@ -45,32 +45,31 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
     let nameCompare parsed name aired =
         (name |> canonizeFileName) = (parsed |> canonizeFileName)
 
-    let episodeFinder compare value =
+    let find compare value =
         Seq.tryFind(fun e -> match e with
                              |Episode(epName, epNumber, epShow, cand, epSeason, epAired) -> compare value epName epAired 
                              |_ -> false)
 
-    let findEpisodeByName file showName showId episodes =
-        let parsedEpisode = parseEpisodeName file
-        let apiEpisode = episodes |> episodeFinder nameCompare parsedEpisode
+    let find parse compare file episodes =
+        let parsedValue = parse file
+        let apiEpisode = episodes |> find compare parsedValue
+        (apiEpisode, parsedValue)
 
-        match apiEpisode with
-        |None -> episodeWithName showName parsedEpisode
-        |_ -> apiEpisode.Value
+    let findByDate = find parseEpisodeDate dateCompare
+    let findByName = find parseEpisodeName nameCompare
 
-    let findEpisodeByDate (file:string) showName showId episodes =
-        let episodeDate = parseEpisodeDate file
-        let apiEpisode = episodes |> episodeFinder dateCompare episodeDate
+    let makeEpisode showName maker (episode, value) =
+        match episode with
+        |None -> maker showName value
+        |Some(e) -> e
 
-        match apiEpisode with
-        |None -> episodeWithDate showName episodeDate
-        |Some(episode) -> episode
+    let containsEpisodeName (file:string) = file.Contains("__")
 
-    let findEpisodeOfShow (file:string) (showName, showId) =
+    let findEpisodeOfShow file (showName, showId) =
         let showEpisodes = tvApi.GetEpisodes(showId, showName)
-        match file.Contains("__") with
-        |true -> findEpisodeByName file showName showId showEpisodes
-        |false -> findEpisodeByDate file showName showId showEpisodes                      
+        match containsEpisodeName file with
+        |true -> findByName file showEpisodes |> makeEpisode showName episodeWithName
+        |false -> findByDate file showEpisodes |> makeEpisode showName episodeWithDate
 
     let findEpisode file = 
         let parsedShow = parseShowName file
