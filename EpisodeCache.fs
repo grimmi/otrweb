@@ -41,7 +41,7 @@ type ShowCache() =
         if not (File.ReadAllLines(getShowMapFile) |> Seq.exists(fun line -> line = serialized)) then
             File.AppendAllText(getShowMapFile, (sprintf "%s%s" Environment.NewLine serialized))
 
-    let serializeEpisode (showid : int) (episode : FileType) =
+    let serializeEpisode showid episode =
         match episode with        
         |Episode(name, number, show, _, season, aired) -> 
             let serialized = sprintf "%s***%d***%d***%s***%s%s" show season number name aired Environment.NewLine
@@ -64,7 +64,7 @@ type ShowCache() =
         let name, id = mapped
         saveMapping parsed name id
 
-    member this.SaveEpisodes (show : string * int) (episodes : FileType seq) =
+    member this.SaveEpisodes show episodes =
         let showname, showid = show
         episodes
         |> Seq.sortBy(fun e -> match e with
