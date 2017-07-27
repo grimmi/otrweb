@@ -7,16 +7,29 @@
 <body>
     <div id="container"></div>
     <script type="text/x-tmpl" id="tmpl-episode">
-        <h3>{%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.episode%} ({%=o.firstAired%})</h3>
+        <h3>{%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})</h3>
     </script>
     <script type="text/javascript">
+        function filterEpisodes(info) {
+            return info["type"] === "episode";
+        }
+
+        function compareEpisodes(a, b) {
+            return a["show"].toLowerCase() > b["show"].toLowerCase() ? 1 : a["show"] === b["show"] ? 0 : -1;
+        }
+
+        function printInfos(response) {
+            var episodes = response["files"].filter(filterEpisodes).sort(compareEpisodes)
+            for (var i = 0; i < episodes.length; i++) {
+                var episode = episodes[i];
+                document.getElementById("container").innerHTML += tmpl("tmpl-episode", episode);
+            }
+        }
+
         window.onload = function () {
-            document.getElementById("container").innerHTML = tmpl("tmpl-episode", { 
-                "show": "Doctor Who (2005)", 
-                "episode":"The One Where The Doctor Fails", 
-                "season": 10, 
-                "number": 10,
-                "firstAired": "2017-07-25"  });
+            var infos = fetch("/api/keyfiles")
+                .then((resp) => resp.json())
+                .then(printInfos);
         }
     </script>
 </body>
