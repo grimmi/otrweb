@@ -93,9 +93,7 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         |_ -> let possibleEpisodes = apiShows |> Seq.map(fun show -> (show, findEpisodeOfShow file show))
               let matchingEpisode = possibleEpisodes |> Seq.tryFind(fun (s, ep) -> tryFindCompleteEpisode ep)
               match matchingEpisode with
-              |Some(show, episode) -> 
-                    tvApi.CacheShow parsedShow show
-                    episode
+              |Some(show, episode) -> episode
               |_ -> listAlternatives apiShows
 
     member this.GetInfo file = 
