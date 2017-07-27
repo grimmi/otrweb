@@ -81,7 +81,10 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
         }
 
         let! firstPage = getEpisodePage showId 1
-        let lastPageNo = firstPage.["links"].Value<int>("last")
+        let lastPageNo = if isNull firstPage.["links"] then 
+                            0
+                         else
+                            firstPage.["links"].Value<int>("last")
 
         let pages = if lastPageNo > 1 then
                         [ 2 .. lastPageNo ]
@@ -89,6 +92,8 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
                                                     return pageResult } |> Async.RunSynchronously)
                         |> List.ofSeq
                         |> List.append [firstPage]  
+                    else if lastPageNo = 0 then
+                        []
                     else
                         [firstPage]
 
@@ -109,14 +114,14 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
                                 |_ -> (0,0))
     }
 
-    member this.GetEpisodes (showId, showName) = 
+    member this.GetEpisodes (showId:int, showName:string) = 
         let cachedEpisodes = cache.GetEpisodes showId
         let episodes = match cachedEpisodes with
                        |[] -> let apiEpisodes = (async {
                                         let! apiEpisodes = this.LoadEpisodesFromApi(showId, showName)            
                                         return apiEpisodes
                                     } |> Async.RunSynchronously)
-                              cache.SaveEpisodes (showName, showId) apiEpisodes
+                              cache.SaveEpisodes (showId, showName) apiEpisodes
                               apiEpisodes
                        |_ -> cachedEpisodes |> Seq.ofList
 

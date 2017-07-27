@@ -64,8 +64,7 @@ type ShowCache() =
         let name, id = mapped
         saveMapping parsed name id
 
-    member this.SaveEpisodes show episodes =
-        let showname, showid = show
+    member this.SaveEpisodes (showid:int, showname:string) episodes =
         episodes
         |> Seq.sortBy(fun e -> match e with
                                |Episode(_,number,_,_,season,_) -> (season, number)

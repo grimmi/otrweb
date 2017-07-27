@@ -70,7 +70,7 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
 
     let containsEpisodeName (file:string) = file.Contains("__")
 
-    let findEpisodeOfShow file (showName, showId) =
+    let findEpisodeOfShow file (showName, (showId:int)) =
         let showEpisodes = tvApi.GetEpisodes(showId, showName)
         match containsEpisodeName file with
         |true -> findByName file showEpisodes |> makeEpisode showName episodeWithName
@@ -85,7 +85,13 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         |[found] -> 
             tvApi.CacheShow parsedShow found
             findEpisodeOfShow file found
-        |_ -> listAlternatives apiShows
+        |_ -> let possibleEpisodes = apiShows |> Seq.map(fun show -> findEpisodeOfShow file show)
+              let matchingEpisode = possibleEpisodes |> Seq.tryFind(fun ep -> match ep with
+                                                                              |Episode(_,number,_,_,_,_) -> number <> -1
+                                                                              |_ -> false)
+              match matchingEpisode with
+              |Some(episode) -> episode
+              |_ -> listAlternatives apiShows
 
     member this.GetInfo file = 
         let fileName = Path.GetFileName file
