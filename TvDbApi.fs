@@ -66,11 +66,14 @@ type TvDbApi(options: IOptions<TvDbOptions>) =
     member this.FindShow showName =
         let cachedShow = cache.GetMappingFor showName
         match cachedShow with
-        |Some(parsed, real, id) -> [(real, id)] |> Seq.ofList
-        |_ -> let query = sprintf "/search/series?name=%s" (Uri.EscapeDataString(showName))
-              let response = (this.Get query) |> Async.RunSynchronously
-              response.["data"]
-              |> Seq.map(fun d -> (d.Value<string>("seriesName"), d.Value<int>("id")))
+        |[] -> let query = sprintf "/search/series?name=%s" (Uri.EscapeDataString(showName))
+               let response = (this.Get query) |> Async.RunSynchronously
+               let shows = response.["data"] 
+                           |> Seq.map(fun d -> (d.Value<string>("seriesName"), d.Value<int>("id"))) |> List.ofSeq
+               shows |> List.iter(fun show -> cache.SaveMapping showName show)
+               shows
+        |[(parsed, real, id)] -> [(real, id)]        
+        |_ -> cachedShow |> List.map(fun (p, r, i) -> (r, i))
 
 
     member private this.LoadEpisodesFromApi(showId, showName) = async {

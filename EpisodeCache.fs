@@ -58,7 +58,8 @@ type ShowCache() =
 
     member this.GetMappingFor parsed =
         this.Mappings
-        |> Seq.tryFind(fun (p, n, id) -> parsed = p)
+        |> Seq.filter(fun (p, _, _) -> parsed = p) |> List.ofSeq
+        // |> Seq.tryFind(fun (p, n, id) -> parsed = p)
 
     member this.SaveMapping parsed mapped =
         let name, id = mapped
