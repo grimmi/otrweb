@@ -44,7 +44,11 @@ type ShowCache() =
     let serializeEpisode showid episode =
         match episode with        
         |Episode(name, number, show, _, season, aired) -> 
-            let serialized = sprintf "%s***%d***%d***%s***%s%s" show season number name aired Environment.NewLine
+            let airedValue = if String.IsNullOrWhiteSpace aired then
+                                "1900-01-01"
+                             else
+                                aired
+            let serialized = sprintf "%s***%d***%d***%s***%s%s" show season number name airedValue Environment.NewLine
             let cachePath = getShowCacheFile showid
             File.AppendAllText(cachePath, serialized)
         |_ -> ()
@@ -52,6 +56,7 @@ type ShowCache() =
     let deserializeEpisode (cachedLine:string) =
         match cachedLine.Split([|"***"|], StringSplitOptions.RemoveEmptyEntries) with
         |[|show;seasonString;numberString;name;aired|] -> Some(Episode(name, numberString |> int, show, [||], seasonString |> int, aired))
+        |[|show;seasonString;numberString;name|] -> Some(Episode(name, numberString |> int, show, [||], seasonString |> int, "1900-01-01"))
         |_ -> None
 
     member this.Mappings = loadMappings
@@ -66,11 +71,15 @@ type ShowCache() =
         saveMapping parsed name id
 
     member this.SaveEpisodes (showid:int, showname:string) episodes =
-        episodes
-        |> Seq.sortBy(fun e -> match e with
-                               |Episode(_,number,_,_,season,_) -> (season, number)
-                               |_ -> (0,0))
-        |> Seq.iter(fun e -> serializeEpisode showid e)
+        if Seq.isEmpty episodes then
+            let tmpEpisode = Episode("placeholder", 0, "placeholder", [||], 0, "placeholder")
+            serializeEpisode showid tmpEpisode
+        else
+            episodes
+            |> Seq.sortBy(fun e -> match e with
+                                   |Episode(_,number,_,_,season,_) -> (season, number)
+                                   |_ -> (0,0))
+            |> Seq.iter(fun e -> serializeEpisode showid e)
 
     member this.GetEpisodes showId =
         let showFile = getShowCacheFile showId

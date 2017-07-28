@@ -99,5 +99,7 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
     member this.GetInfo file = 
         let fileName = Path.GetFileName file
         match isMovie fileName with
-        |true -> { file = file; info = findMovie fileName }
-        |false -> { file = file; info = findEpisode fileName }
+        |true -> let movie = findMovie fileName
+                 { file = fileName; info = movie }
+        |false ->let episode = findEpisode fileName
+                 { file = fileName; info = episode }
