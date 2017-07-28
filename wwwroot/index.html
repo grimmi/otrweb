@@ -2,27 +2,90 @@
 
 <head>
     <script src="js/template/tmpl.min.js"></script>
+    <script src="js/my.js"></script>
+    <link rel="stylesheet" href="css/my.css" />
 </head>
 
 <body>
-    <div id="container"></div>
+    <div id="container" class="container">
+        <h2>OTR Filemanager</h2>
+        <h3>Episodes</h3>
+    </div>
+    <div id="moviecontainer" class="container">
+        <h3>Movies</h3>
+    </div>
     <script type="text/x-tmpl" id="tmpl-episode">
-        <h3>{%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})</h3>
+        <div class="{%=o.class %}" title="{%=o.name%}">
+            <div class="episodeicon" title="Episode" /> 
+            
+            {% if(o.season != "?"){ %}
+            <div class="foundicon" title="Found a match" /> {% }
+            else{ %} 
+            <div class="missingicon" title="Info missing" /> {% } %}
+            
+            {% if(o.cut === true){ %}
+            <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
+            <div class="notcut" /> {% } %} 
+
+            {% if(o.processed === true){ %}
+            <div class="processedicon" title="File was processed" />{% }else{ %}
+            <div class="notcut" /> {% } %}
+            
+            {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})</div>
+            <div class="filename">{%=o.file%}</div>
+        </div>
+    </script>
+    <script type="text/x-tmpl" id="tmpl-movie">
+        <div class="{%=o.class %}">
+            <div class="movieicon" title="Movie">{% if(o.candidates.length === 0){ %}
+                <div class="foundicon" title="Found a match" /> {% } %} {% if(o.cut === true){ %}
+                <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
+                <div class="notcut" /> {% } %} {%=o.name%} ({%=o.released%})
+                <div class="filename">{%=o.file%}</div>
+            </div>
     </script>
     <script type="text/javascript">
         function filterEpisodes(info) {
             return info["type"] === "episode";
         }
 
+        function filterMovies(info) {
+            return info["type"] === "movie";
+        }
+
+        function compareMovies(a, b) {
+            return a["name"].toLowerCase() > b["name"].toLowerCase() ? 1 : a["name"] === b["name"] ? 0 : -1;
+        }
+
+        function compare(a, b) {
+            if (a === b) { return 0; }
+            else if (a > b) { return 1; }
+            return -1;
+        }
+
         function compareEpisodes(a, b) {
-            return a["show"].toLowerCase() > b["show"].toLowerCase() ? 1 : a["show"] === b["show"] ? 0 : -1;
+            var showCompare = compare(a["show"].toLowerCase(), b["show"].toLowerCase());
+            if (showCompare != 0) { return showCompare; }
+            var seasonCompare = compare(a["season"], b["season"]);
+            if (seasonCompare != 0) { return seasonCompare; }
+            var numberCompare = compare(a["number"], b["number"]);
+            return numberCompare;
         }
 
         function printInfos(response) {
-            var episodes = response["files"].filter(filterEpisodes).sort(compareEpisodes)
+            var episodes = response["files"].filter(filterEpisodes).sort(compareEpisodes);
             for (var i = 0; i < episodes.length; i++) {
                 var episode = episodes[i];
+                episode["season"] = episode["season"] === -1 ? "?" : pad(episode["season"]);
+                episode["number"] = episode["number"] === -1 ? "?" : pad(episode["number"]);
+                episode["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
                 document.getElementById("container").innerHTML += tmpl("tmpl-episode", episode);
+            }
+            var movies = response["files"].filter(filterMovies).sort();
+            for (var i = 0; i < movies.length; i++) {
+                var movie = movies[i];
+                movie["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
+                document.getElementById("moviecontainer").innerHTML += tmpl("tmpl-movie", movie);
             }
         }
 

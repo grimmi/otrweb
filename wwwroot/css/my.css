@@ -1,0 +1,91 @@
+.dark-primary-color    { background: #0288D1; }
+.default-primary-color { background: #03A9F4; }
+.light-primary-color   { background: #B3E5FC; }
+.text-primary-color    { color: #FFFFFF; }
+.accent-color          { background: #4CAF50; }
+.primary-text-color    { color: #212121; }
+.secondary-text-color  { color: #757575; }
+.divider-color         { border-color: #BDBDBD; }
+
+
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;   
+    color: #212121; 
+}
+
+.episodeicon{
+    background: url("../img/episode.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+    height: 30px;
+}
+
+.movieicon{
+    background: url("../img/movie.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+}
+
+.foundicon{
+    background: url("../img/found.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+}
+
+.missingicon{
+    background: url("../img/missing.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+}
+
+.cuticon{
+    background: url("../img/cut.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+}
+
+.processedicon{
+    background: url("../img/processed.png");
+    background-repeat: no-repeat;
+    display: block;
+    padding-left: 30px;
+    height: 30px;
+}
+
+.notcut{
+    display: block;
+    padding-left: 30px;
+}
+
+.evenrow{
+    padding-left: 3px;
+    color: #03A9F4;
+    margin-bottom: 5px;
+    background-color: #f0f0f0;
+    height: 40px;
+}
+
+.oddrow{
+    padding-left: 3px;
+    color: #0288D1;
+    margin-bottom: 5px;
+    background-color: #fafafa;
+    height: 40px;
+}
+
+.container{
+    width: 50%;
+    margin: 0 auto;
+}
+
+.filename{
+    margin-top: -5px;
+    margin-left: 30px;
+    color: #757575;
+    font-size: 10pt;
+}
