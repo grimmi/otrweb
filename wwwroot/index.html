@@ -16,7 +16,21 @@
             <h3>Movies</h3>
         </div>
     </div>
+    <div id="editpopup" class="overlay">
+        <div id="editcontent" class="popup">
+            <label for="editshow" class="editlabel">Show</label>
+            <input id="editshow" type="text" class="editinput"/><br />            
+            <label for="editseason" class="editlabel">Season</label>
+            <input id="editseason" type="text" class="editinput"/><br />
+            <label for="editname" class="editlabel">Name</label>
+            <input id="editname" type="text" class="editinput"/><br />
+            <label for="editnumber" class="editlabel">Number</label>
+            <input id="editnumber" type="text" class="editinput"/><br />
+            <a href="#">close me</a>
+        </div>
+    </div>
     <script type="text/x-tmpl" id="tmpl-episode">
+        <a href="#editpopup" onclick="filledit({%=o.index%})">
         <div class="{%=o.class %}" title="{%=o.name%}">
             <div class="episodeicon" title="Episode" /> 
             
@@ -36,6 +50,7 @@
             {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})</div>
             <div class="filename">{%=o.file%}</div>
         </div>
+        </a>
     </script>
     <script type="text/x-tmpl" id="tmpl-movie">
         <div class="{%=o.class %}">
@@ -76,17 +91,21 @@
 
         function printInfos(response) {
             var episodes = response["files"].filter(filterEpisodes).sort(compareEpisodes);
+            loadedepisodes = episodes;
             for (var i = 0; i < episodes.length; i++) {
                 var episode = episodes[i];
                 episode["season"] = episode["season"] === -1 ? "?" : pad(episode["season"]);
                 episode["number"] = episode["number"] === -1 ? "?" : pad(episode["number"]);
                 episode["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
+                episode["index"] = i;
                 document.getElementById("container").innerHTML += tmpl("tmpl-episode", episode);
             }
             var movies = response["files"].filter(filterMovies).sort();
+            loadedmovies = movies;
             for (var i = 0; i < movies.length; i++) {
                 var movie = movies[i];
                 movie["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
+                movie["index"] = i;
                 document.getElementById("moviecontainer").innerHTML += tmpl("tmpl-movie", movie);
             }
         }

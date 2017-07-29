@@ -3,6 +3,15 @@ body{
     color: #212121; 
 }
 
+a{
+    text-decoration: none;
+}
+
+a:visited{
+    text-decoration: none;
+    color: #03A9F4;
+}
+
 .episodeicon{
     background: url("../img/episode.png");
     background-repeat: no-repeat;
@@ -75,12 +84,56 @@ body{
 
 .filename{
     margin-top: -7px;
-    margin-left: 30px;
     color: #757575;
     font-size: 10pt;
+    float: left;
 }
 
 .background{
     width: 55%;
+    min-width: 800px;
     margin: 0 auto;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 500ms;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 50%;
+  min-width: 300px;
+  position: relative;
+  transition: all 5s ease-in-out;
+}
+
+.popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+
+.editinput{
+    border: 0px solid black;
+    background-color: #e0e0e0;
+    width: 100%;
+}
+
+.editlabel{
+    display: block;
 }
