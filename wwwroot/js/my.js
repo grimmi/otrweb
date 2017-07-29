@@ -17,4 +17,5 @@ function filledit(index){
     document.getElementById("editseason").value = editepisode["season"];
     document.getElementById("editname").value = editepisode["name"];
     document.getElementById("editnumber").value = editepisode["number"];
+    document.getElementById("closepopup").setAttribute("href", "#ep-" + editepisode["index"]);
 }
