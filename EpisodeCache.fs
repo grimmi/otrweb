@@ -34,7 +34,8 @@ type ShowCache() =
 
     let loadMappings =
         File.ReadAllLines getShowMapFile
-        |> Seq.choose deserializeMapping
+        |> List.ofArray
+        |> List.choose deserializeMapping
 
     let saveMapping parsed name id = 
         let serialized = serializeMapping parsed name id
@@ -63,8 +64,7 @@ type ShowCache() =
 
     member this.GetMappingFor parsed =
         this.Mappings
-        |> Seq.filter(fun (p, _, _) -> parsed = p) |> List.ofSeq
-        // |> Seq.tryFind(fun (p, n, id) -> parsed = p)
+        |> List.filter(fun (p, _, _) -> parsed = p)
 
     member this.SaveMapping parsed mapped =
         let name, id = mapped
