@@ -19,3 +19,9 @@ function filledit(index){
     document.getElementById("editnumber").value = editepisode["number"];
     document.getElementById("closepopup").setAttribute("href", "#ep-" + editepisode["index"]);
 }
+
+function fillmovieedit(index){
+    var editmovie = loadedmovies[index];
+    document.getElementById("editmoviename").value = editmovie["name"];
+    document.getElementById("closemoviepopup").setAttribute("href", "#mov-" + editmovie["index"]);
+}
