@@ -26,12 +26,12 @@
             <input id="editname" type="text" class="editinput"/><br />
             <label for="editnumber" class="editlabel">Number</label>
             <input id="editnumber" type="text" class="editinput"/><br />
-            <a href="#">close me</a>
+            <a id="closepopup" href="#">close me</a>
         </div>
     </div>
     <script type="text/x-tmpl" id="tmpl-episode">
         <a href="#editpopup" onclick="filledit({%=o.index%})">
-        <div class="{%=o.class %}" title="{%=o.name%}">
+        <div class="{%=o.class %}" title="{%=o.name%}" id="ep-{%=o.index%}">
             <div class="episodeicon" title="Episode" /> 
             
             {% if(o.season != "?"){ %}
