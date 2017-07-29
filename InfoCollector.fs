@@ -86,7 +86,7 @@ type InfoCollector(tvApi : TvDbApi, movieApi : MovieDbApi) =
         let apiShows = (tvApi.FindShow parsedShow) |> List.ofSeq
 
         match apiShows with
-        |[] -> Unknown
+        |[] -> Episode(parseEpisodeName file, -1, parsedShow, [||], -1, "unknown")
         |[found] -> 
             tvApi.CacheShow parsedShow found
             findEpisodeOfShow file found
