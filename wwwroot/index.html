@@ -8,129 +8,65 @@
 
 <body>
     <div class="background">
+        <h2>OTR Filemanager</h2>
+        <h3>Episodes</h3>
         <div id="container" class="container">
-            <h2>OTR Filemanager</h2>
-            <h3>Episodes</h3>
         </div>
+        <h3>Movies</h3>
         <div id="moviecontainer" class="container">
-            <h3>Movies</h3>
         </div>
     </div>
     <div id="editpopup" class="overlay">
         <div id="editcontent" class="popup">
             <label for="editshow" class="editlabel">Show</label>
-            <input id="editshow" type="text" class="editinput"/><br />            
+            <input id="editshow" type="text" class="editinput" /><br />
             <label for="editseason" class="editlabel">Season</label>
-            <input id="editseason" type="text" class="editinput"/><br />
+            <input id="editseason" type="text" class="editinput" /><br />
             <label for="editname" class="editlabel">Name</label>
-            <input id="editname" type="text" class="editinput"/><br />
+            <input id="editname" type="text" class="editinput" /><br />
             <label for="editnumber" class="editlabel">Number</label>
-            <input id="editnumber" type="text" class="editinput"/><br />
-            <a id="closepopup" href="#">close me</a>
+            <input id="editnumber" type="text" class="editinput" /><br />
+            <a id="cancelpopup" href="#" style="float:left">cancel</a><a style="float:right" id="closepopup" href="#" onclick="applyepisodeedits()">save</a>
         </div>
     </div>
     <div id="movieedit" class="overlay">
         <div id="movieeditcontent" class="popup">
             <label for="editmoviename" class="editlabel">Name</label>
             <input id="editmoviename" type="text" class="editinput" />
-            <a id="closemoviepopup" href="#">close me</a>
+            <a id="cancelmoviepopup" href="#">cancel</a><a id="closemoviepopup" href="#" onclick="applymovieedits()">close me</a>
         </div>
     </div>
     <script type="text/x-tmpl" id="tmpl-episode">
         <a href="#editpopup" onclick="filledit({%=o.index%})">
-        <div class="{%=o.class %}" title="{%=o.name%}" id="ep-{%=o.index%}">
-            <div class="episodeicon" title="Episode" /> 
-            
-            {% if(o.season != "?"){ %}
-            <div class="foundicon" title="Found a match" /> {% }
-            else{ %} 
-            <div class="missingicon" title="Info missing" /> {% } %}
-            
-            {% if(o.cut === true){ %}
-            <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
-            <div class="notcut" /> {% } %} 
-
-            {% if(o.processed === true){ %}
-            <div class="processedicon" title="File was processed" />{% }else{ %}
-            <div class="notcut" /> {% } %}
-            
-            {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})
-            <div class="filename">{%=o.file%}</div></div>
-        </div>
+            <div class="{%=o.class %}" title="{%=o.name%}" id="ep-{%=o.index%}">
+                <div class="episodeicon" title="Episode" /> {% if(o.season != "?"){ %}
+                <div class="foundicon" title="Found a match" /> {% } else{ %}
+                <div class="missingicon" title="Info missing" /> {% } %} {% if(o.cut === true){ %}
+                <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
+                <div class="notcut" /> {% } %} {% if(o.processed === true){ %}
+                <div class="processedicon" title="File was processed" />{% }else{ %}
+                <div class="notcut" /> {% } %} {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})
+                <br />
+                <span class="filename">{%=o.file%}</span></div>
+            </div>
         </a>
     </script>
     <script type="text/x-tmpl" id="tmpl-movie">
         <a href="#movieedit" onclick="fillmovieedit({%=o.index%})">
-        <div class="{%=o.class %}" title="{%=o.name%}" id="mov-{%=o.index%}">
-            <div class="movieicon" title="Movie" /> 
-            
-            {% if(o.season != "?"){ %}
-            <div class="foundicon" title="Found a match" /> {% }
-            else{ %} 
-            <div class="missingicon" title="Info missing" /> {% } %}
-            
-            {% if(o.cut === true){ %}
-            <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
-            <div class="notcut" /> {% } %} 
-
-            {% if(o.processed === true){ %}
-            <div class="processedicon" title="File was processed" />{% }else{ %}
-            <div class="notcut" /> {% } %}
-            
-            {%=o.name%} ({%=o.released%})
-            <div class="filename">{%=o.file%}</div></div>
-        </div>
+            <div class="{%=o.class %}" title="{%=o.name%}" id="mov-{%=o.index%}">
+                <div class="movieicon" title="Movie" /> {% if(o.season != "?"){ %}
+                <div class="foundicon" title="Found a match" /> {% } else{ %}
+                <div class="missingicon" title="Info missing" /> {% } %} {% if(o.cut === true){ %}
+                <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
+                <div class="notcut" /> {% } %} {% if(o.processed === true){ %}
+                <div class="processedicon" title="File was processed" />{% }else{ %}
+                <div class="notcut" /> {% } %} {%=o.name%} ({%=o.released%})
+                <br />
+                <span class="filename">{%=o.file%}</span></div>
+            </div>
         </a>
     </script>
     <script type="text/javascript">
-        function filterEpisodes(info) {
-            return info["type"] === "episode";
-        }
-
-        function filterMovies(info) {
-            return info["type"] === "movie";
-        }
-
-        function compareMovies(a, b) {
-            return a["name"].toLowerCase() > b["name"].toLowerCase() ? 1 : a["name"] === b["name"] ? 0 : -1;
-        }
-
-        function compare(a, b) {
-            if (a === b) { return 0; }
-            else if (a > b) { return 1; }
-            return -1;
-        }
-
-        function compareEpisodes(a, b) {
-            var showCompare = compare(a["show"].toLowerCase(), b["show"].toLowerCase());
-            if (showCompare != 0) { return showCompare; }
-            var seasonCompare = compare(a["season"], b["season"]);
-            if (seasonCompare != 0) { return seasonCompare; }
-            var numberCompare = compare(a["number"], b["number"]);
-            return numberCompare;
-        }
-
-        function printInfos(response) {
-            var episodes = response["files"].filter(filterEpisodes).sort(compareEpisodes);
-            loadedepisodes = episodes;
-            for (var i = 0; i < episodes.length; i++) {
-                var episode = episodes[i];
-                episode["season"] = episode["season"] === -1 ? "?" : pad(episode["season"]);
-                episode["number"] = episode["number"] === -1 ? "?" : pad(episode["number"]);
-                episode["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
-                episode["index"] = i;
-                document.getElementById("container").innerHTML += tmpl("tmpl-episode", episode);
-            }
-            var movies = response["files"].filter(filterMovies).sort();
-            loadedmovies = movies;
-            for (var i = 0; i < movies.length; i++) {
-                var movie = movies[i];
-                movie["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
-                movie["index"] = i;
-                document.getElementById("moviecontainer").innerHTML += tmpl("tmpl-movie", movie);
-            }
-        }
-
         window.onload = function () {
             var infos = fetch("/api/keyfiles")
                 .then((resp) => resp.json())
