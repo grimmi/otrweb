@@ -37,6 +37,7 @@ type Startup private () =
         services.AddSingleton<TvDbApi>() |> ignore
         services.AddSingleton<MovieDbApi>() |> ignore
         services.AddSingleton<InfoCollector>() |> ignore
+        services.AddSingleton<JobService>() |> ignore
         services.AddMvc() |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

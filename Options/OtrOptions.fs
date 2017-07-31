@@ -9,3 +9,6 @@ type OtrOptions() =
     member val ProcessTargetPath = "" with get, set
     member val EpisodeFolder = "" with get, set
     member val MovieFolder = "" with get, set
+    member val CreateDirectories = true with get, set
+    member val AutoCut = true with get, set
+    member val ContinueWithoutCutlist = true with get, set
