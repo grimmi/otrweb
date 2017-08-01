@@ -49,18 +49,18 @@ type DecodeJob() =
         let decoder = OtrFileDecoder()
         this.CurrentStep <- filename
         let source = Path.Combine(options.KeyFilePath, filename)
-        System.Threading.Thread.Sleep(3000)
-        // let decodeResult = decoder.DecodeFile source options
-        let decodeResult = "theresult"
+        let decodeResult = decoder.DecodeFile source options
+        this.Cutlist <- decoder.UsedCutlist
         let targetPath = Path.Combine(options.ProcessTargetPath, targetSubFolder, targetName + ".avi")
         printfn "targetpath: %s" targetPath
         let targetDir = Path.GetDirectoryName targetPath
-        // if not(Directory.Exists targetDir) then
-        //     Directory.CreateDirectory targetDir |> ignore
-        // let processedPath = Path.Combine(options.KeyFilePath, "processed", filename)
-        // if File.Exists processedPath then
-        //     File.Delete processedPath
-        // File.Move(source, processedPath)
+        if not(Directory.Exists targetDir) then
+            Directory.CreateDirectory targetDir |> ignore
+        File.Copy(decodeResult, targetPath)
+        let processedPath = Path.Combine(options.KeyFilePath, "processed", filename)
+        if File.Exists processedPath then
+            File.Delete processedPath
+        File.Move(source, processedPath)
         this.IsDone <- true
     }
 
