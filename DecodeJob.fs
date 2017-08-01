@@ -23,65 +23,47 @@ type DecodeJob() =
     member this.Id
         with get () = id
 
-    member val internal ProgValue = 0. with get, set
-
-    member this.Progress 
-        with get () = Decimal.Parse(this.ProgValue.ToString("N2"))
-
     member val CurrentStep = "" with get, set
-
-    member val Files : string list = [] with get, set
 
     member val Cutlist : bool = false with get, set
 
     member val IsDone = false with get, set
 
     member this.RunEpisode (episode:JObject) (options:OtrOptions) = async {
-        let decoder = OtrFileDecoder()
         let filename = Path.GetFileName(episode.Value<string>("file"))
-        this.CurrentStep <- filename
-        let source = Path.Combine (options.KeyFilePath, filename)
-        printfn "sourcepath: %s" source
-        let decodeResult = decoder.DecodeFile source options
-        this.Cutlist <- decoder.UsedCutlist
-        printfn "decoderesult: %s" decodeResult
         let show = episode.Value<string>("show")
         let targetname = makeFileName show (episode.Value<string>("name")) (episode.Value<int>("season")) (episode.Value<int>("number"))
-        let targetpath = Path.Combine(options.ProcessTargetPath, options.EpisodeFolder, show, targetname) + ".avi"
-        printfn "targetpath: %s" targetpath
-        if not (Directory.Exists(Path.Combine(options.ProcessTargetPath, options.EpisodeFolder))) then
-            Directory.CreateDirectory(Path.Combine(options.ProcessTargetPath, options.EpisodeFolder)) |> ignore
-        File.Copy(decodeResult, targetpath)
-        if (File.Exists(Path.Combine(options.KeyFilePath, "processed", filename))) then
-            File.Delete(Path.Combine(options.KeyFilePath, "processed", filename))
-        File.Move(Path.Combine(source), Path.Combine(options.KeyFilePath, "processed", filename))
-        this.IsDone <- true
+        let subFolder = show + "/" + options.EpisodeFolder
+        this.Run filename targetname subFolder options |> Async.Start
     }
 
-    member this.RunMovie (movie:JObject) (options:OtrOptions) = async {
+    member this.RunMovie (movie:JObject) (options:OtrOptions) = async {        
         let decoder = OtrFileDecoder()
-        let filename = Path.GetFileName(movie.Value<string>("file"))
-        this.CurrentStep <- filename
-        let source = Path.Combine (options.KeyFilePath, filename)
-        printfn "source: %s" source
-        let decodeResult = decoder.DecodeFile source options
-        printfn "decoderesult: %s" decodeResult
+        let file = Path.GetFileName(movie.Value<string>("file"))
         let name = movie.Value<string>("name") |> makeMovieFileName
-        let targetpath = Path.Combine(options.ProcessTargetPath, options.MovieFolder, name + ".avi")
-        printfn "targetpath: %s" targetpath
-        if not (Directory.Exists(Path.Combine(options.ProcessTargetPath, options.MovieFolder))) then
-            Directory.CreateDirectory(Path.Combine(options.ProcessTargetPath, options.MovieFolder)) |> ignore
-        File.Copy(decodeResult, targetpath)
-        if (File.Exists(Path.Combine(options.KeyFilePath, "processed", filename))) then
-            File.Delete(Path.Combine(options.KeyFilePath, "processed", filename))
-        File.Move(Path.Combine(source), Path.Combine(options.KeyFilePath, "processed", filename))
+
+        this.Run file name options.MovieFolder options |> Async.Start
+    }
+
+    member this.Run filename targetName targetSubFolder (options:OtrOptions) = async {
+        let decoder = OtrFileDecoder()
+        this.CurrentStep <- filename
+        let source = Path.Combine(options.KeyFilePath, filename)
+        let decodeResult = decoder.DecodeFile source options
+        let targetPath = Path.Combine(options.ProcessTargetPath, targetSubFolder, targetName + ".avi")
+        let targetDir = Path.GetDirectoryName targetPath
+        if not(Directory.Exists targetDir) then
+            Directory.CreateDirectory targetDir |> ignore
+        let processedPath = Path.Combine(options.KeyFilePath, "processed", filename)
+        if File.Exists processedPath then
+            File.Delete processedPath
+        File.Move(source, processedPath)
         this.IsDone <- true
     }
 
     member this.ToJson() =
         let json = JObject()
         json.Add("id", JToken.FromObject(this.Id))
-        json.Add("progress", JToken.FromObject(this.Progress))
         json.Add("currentstep", JToken.FromObject(this.CurrentStep))
         json.Add("done", JToken.FromObject(this.IsDone))
         json.Add("cutlist", JToken.FromObject(this.Cutlist))
