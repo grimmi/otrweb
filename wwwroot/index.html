@@ -40,14 +40,8 @@
     </div>
     <script type="text/x-tmpl" id="tmpl-episode">
         <a href="#editpopup" onclick="filledit({%=o.index%})">
-            <div class="{%=o.class %}" title="{%=o.name%}" id="ep-{%=o.index%}">
-                <div class="episodeicon" title="Episode" /> {% if(o.season != "?"){ %}
-                <div class="foundicon" title="Found a match" /> {% } else{ %}
-                <div class="missingicon" title="Info missing" /> {% } %} {% if(o.cut === true){ %}
-                <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
-                <div class="notcut" /> {% } %} {% if(o.processed === true){ %}
-                <div class="processedicon" title="File was processed" />{% }else{ %}
-                <div class="notcut" /> {% } %} {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})
+            <div class="{%=o.iconclass%}" title="{%=o.name%}" id="ep-{%=o.index%}">
+                {%=o.show%} - {%=o.season%}x{%=o.number%} - {%=o.name%} ({%=o.aired%})
                 <br />
                 <span class="filename">{%=o.file%}</span></div>
             </div>
@@ -55,16 +49,10 @@
     </script>
     <script type="text/x-tmpl" id="tmpl-movie">
         <a href="#movieedit" onclick="fillmovieedit({%=o.index%})">
-            <div class="{%=o.class %}" title="{%=o.name%}" id="mov-{%=o.index%}">
-                <div class="movieicon" title="Movie" /> {% if(o.season != "?"){ %}
-                <div class="foundicon" title="Found a match" /> {% } else{ %}
-                <div class="missingicon" title="Info missing" /> {% } %} {% if(o.cut === true){ %}
-                <div class="cuticon" title="Cut using a cutlist" /> {% }else{ %}
-                <div class="notcut" /> {% } %} {% if(o.processed === true){ %}
-                <div class="processedicon" title="File was processed" />{% }else{ %}
-                <div class="notcut" /> {% } %} {%=o.name%} ({%=o.released%})
+            <div class="{%=o.iconclass%}" title="{%=o.name%}" id="mov-{%=o.index%}">
+                {%=o.name%} ({%=o.released%})
                 <br />
-                <span class="filename">{%=o.file%}</span></div>
+                <span class="filename">{%=o.file%}</span>
             </div>
         </a>
     </script>

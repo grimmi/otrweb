@@ -48,10 +48,11 @@ function printepisodes(episodes) {
     document.getElementById("container").innerHTML = "";
     for (var i = 0; i < episodes.length; i++) {
         var episode = episodes[i];
+        episode["index"] = i;
+        var iconclass = getfileclass(episode, null) + "notprocessed";
+        episode["iconclass"] = iconclass;
         episode["season"] = episode["season"] === -1 ? "?" : pad(episode["season"]);
         episode["number"] = episode["number"] === -1 ? "?" : pad(episode["number"]);
-        episode["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
-        episode["index"] = i;
         document.getElementById("container").innerHTML += tmpl("tmpl-episode", episode);
     }
 }
@@ -60,8 +61,9 @@ function printmovies(movies) {
     document.getElementById("moviecontainer").innerHTML = "";
     for (var i = 0; i < movies.length; i++) {
         var movie = movies[i];
-        movie["class"] = i % 2 == 0 ? "evenrow" : "oddrow";
         movie["index"] = i;
+        var iconclass = getfileclass(movie, null) + "notprocessed";
+        movie["iconclass"] = iconclass;
         document.getElementById("moviecontainer").innerHTML += tmpl("tmpl-movie", movie);
     }
 }
@@ -169,9 +171,35 @@ function showstatus() {
                 }
             }
             else {
+                markdone(currentfile, response);
                 if (currentContinuation !== null) {
                     currentContinuation();
                 }
             }
         });
+}
+
+function markdone(file, response){
+    var div;
+    if(file["type"] === "movie"){
+        div = document.getElementById("mov-" + file["index"]);
+    }
+    else{
+        div = document.getElementById("ep-" + file["index"]);
+    }
+    var iconclass = getfileclass(file, response) + "processed";
+    div.className = iconclass;
+}
+
+function getfileclass(file, response){
+    var fileclass = "";
+    if(file["index"] % 2 === 0){ fileclass += "evenrow "; }
+    else{ fileclass += "oddrow "; }
+    if(file["type"] === "movie"){ fileclass += "mov-"; }
+    else{ fileclass += "ep-"; }
+    if(file["name"] === "unknown" || file["aired"] === "unknown"){ fileclass += "notfound-"; }
+    else{ fileclass += "found-"; }
+    if(response !== null && response["cut"]){ fileclass += "cut-"; }
+    else{ fileclass += "notcut-"; }
+    return fileclass;
 }
