@@ -2,6 +2,11 @@ var loadedepisodes = [];
 var currentepisode = {};
 var loadedmovies = [];
 var currentmovie = {};
+var movieindex = 0;
+var episodeindex = 0;
+
+var currentfile = {};
+var currentContinuation;
 
 function filterEpisodes(info) {
     return info["type"] === "episode";
@@ -51,7 +56,7 @@ function printepisodes(episodes) {
     }
 }
 
-function printmovies(movies){
+function printmovies(movies) {
     document.getElementById("moviecontainer").innerHTML = "";
     for (var i = 0; i < movies.length; i++) {
         var movie = movies[i];
@@ -75,11 +80,11 @@ function filledit(index) {
     document.getElementById("editseason").value = currentepisode["season"];
     document.getElementById("editname").value = currentepisode["name"];
     document.getElementById("editnumber").value = currentepisode["number"];
-    document.getElementById("closepopup").setAttribute("href", "#ep-" + currentepisode["index"]);    
+    document.getElementById("closepopup").setAttribute("href", "#ep-" + currentepisode["index"]);
     document.getElementById("cancelpopup").setAttribute("href", "#ep-" + currentepisode["index"]);
 }
 
-function applyepisodeedits(){
+function applyepisodeedits() {
     currentepisode["show"] = document.getElementById("editshow").value;
     currentepisode["season"] = document.getElementById("editseason").value;
     currentepisode["name"] = document.getElementById("editname").value;
@@ -101,4 +106,72 @@ function applymovieedits() {
     loadedmovies[currentmovie["index"]] = currentmovie;
     printmovies(loadedmovies);
     currentmovie = {};
+}
+
+function processepisodes() {
+    for (var i = episodeindex; i < loadedepisodes.length; i++) {
+        var episode = loadedepisodes[i];
+        if (episode["show"] !== "unknown"
+            && episode["name"] !== "unknown"
+            && episode["season"] !== "?"
+            && episode["number"] !== "?") {
+            episodeindex++;
+            currentContinuation = processepisodes;
+            sendfile(episode);
+            break;
+        }
+    }
+    if(episodeindex === loadedepisodes.length){
+        document.getElementById("status").innerHTML = "all episodes processed!";
+    }
+}
+
+function processmovies() {
+    for (var i = movieindex; i < loadedmovies.length; i++) {
+        var movie = loadedmovies[i];
+        if (movie["name"] !== "unknown" && movie["released"] !== "unknown") {
+            movieindex++;
+            currentContinuation = processmovies;
+            sendfile(movie);
+            break;
+        }
+    }
+    if (movieindex == loadedmovies.length) {
+        document.getElementById("status").innerHTML = "all movies processed!";
+    }
+}
+
+function sendfile(movie) {
+    currentfile = movie;
+    fetch("api/process", {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        method: "POST",
+        body: "fileinfo=" + encodeURIComponent(JSON.stringify(movie))
+    }).then(function (response) {
+        showstatus()
+    });
+}
+
+function showstatus() {
+    fetch("api/process", {
+        headers: { "Content-Type": "application/json" },
+        method: "GET"
+    }).then(resp => resp.json())
+        .then(function (response) {
+            if (!response["done"]) {
+                setTimeout(showstatus, 1000);
+                var time = new Date().toLocaleTimeString();
+                if (currentfile["type"] === "movie") {
+                    document.getElementById("status").innerHTML = "(" + time + ") current movie: " + currentfile["name"];
+                }
+                else if (currentfile["type"] === "episode") {
+                    document.getElementById("status").innerHTML = "(" + time + ") current episode: " + currentfile["show"] + " - " + currentfile["name"];
+                }
+            }
+            else {
+                if (currentContinuation !== null) {
+                    currentContinuation();
+                }
+            }
+        });
 }
