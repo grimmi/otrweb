@@ -199,7 +199,7 @@ function getfileclass(file, response){
     else{ fileclass += "ep-"; }
     if(file["name"] === "unknown" || file["aired"] === "unknown"){ fileclass += "notfound-"; }
     else{ fileclass += "found-"; }
-    if(response !== null && response["cut"]){ fileclass += "cut-"; }
+    if(response !== null && response["cutlist"]){ fileclass += "cut-"; }
     else{ fileclass += "notcut-"; }
     return fileclass;
 }
