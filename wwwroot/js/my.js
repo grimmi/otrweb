@@ -125,6 +125,7 @@ function processepisodes() {
     }
     if(episodeindex === loadedepisodes.length){
         document.getElementById("status").innerHTML = "all episodes processed!";
+        updateLibrary();
     }
 }
 
@@ -140,6 +141,7 @@ function processmovies() {
     }
     if (movieindex == loadedmovies.length) {
         document.getElementById("status").innerHTML = "all movies processed!";
+        updateLibrary();
     }
 }
 
@@ -202,4 +204,10 @@ function getfileclass(file, response){
     if(response !== null && response["cutlist"]){ fileclass += "cut-"; }
     else{ fileclass += "notcut-"; }
     return fileclass;
+}
+
+function updateLibrary() {
+    fetch("/api/updatemedialibrary", {
+        method: "GET"
+    });
 }
