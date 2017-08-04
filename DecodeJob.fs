@@ -33,7 +33,7 @@ type DecodeJob() =
         let filename = Path.GetFileName(episode.Value<string>("file"))
         let show = episode.Value<string>("show")
         let targetname = makeFileName show (episode.Value<string>("name")) (episode.Value<int>("season")) (episode.Value<int>("number"))
-        let subFolder = show + "/" + options.EpisodeFolder
+        let subFolder =  options.EpisodeFolder + "/" + show
         this.Run filename targetname subFolder options |> Async.Start
     }
 
